@@ -1,103 +1,100 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
 import Image from "next/image";
+import { useEffect, useState } from "react";
+
+type S3File = {
+  key: string;
+  url: string;
+  lastModified?: string;
+  size: number;
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [fileList, setFileList] = useState<S3File[]>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+  const fetchFileList = async () => {
+    try {
+      const response = await fetch("/api/files");
+      const data = await response.json();
+      setFileList(data.files as S3File[]);
+    } catch (error) {
+      console.error("Error fetching file list:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFileList();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-[#f9f9f9] text-gray-800 px-6 py-12 sm:px-16 font-sans">
+      <main className="max-w-3xl mx-auto">
+        {/* Header / Hero Section */}
+        <header className="mb-12 text-center">
+          <h1 className="text-4xl font-bold mb-2">Ilham Rafi Blog App</h1>
+          <p className="text-gray-600 max-w-xl mx-auto">
+            Selamat datang di halaman Blog Saya!
+          </p>
+        </header>
+
+        {/* File List Section */}
+        <section className="bg-white rounded-xl shadow-md p-6">
+          <h2 className="text-2xl font-semibold mb-4 border-b pb-2">
+            Daftar File Tersimpan
+          </h2>
+          {fileList.length > 0 ? (
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {fileList.map((file: any, index: number) => (
+                <li
+                  key={index}
+                  className="border rounded-md p-4 shadow-sm bg-gray-50"
+                >
+                  {file.key.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                    <div>
+                      <Image
+                        src={file.url}
+                        alt={file.key}
+                        width={500}
+                        height={300}
+                        className="w-full h-auto rounded-md border"
+                      />
+                      <p className="mt-2 text-sm text-gray-600 text-center">
+                        {file.key} • {(file.size / 1024).toFixed(2)} KB
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2 text-center">
+                      <a
+                        href={file.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline hover:text-blue-800"
+                      >
+                        {file.key}
+                      </a>
+                      <span className="text-sm text-gray-500 italic">
+                        {(file.size / 1024).toFixed(2)} KB
+                      </span>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500 text-center py-8">
+              Belum ada file yang diunggah.
+            </p>
+          )}
+        </section>
+
+        {/* Footer */}
+        <footer className="mt-16 text-center text-sm text-gray-400">
+          &copy; {new Date().getFullYear()} Ilham Rafi Blog App. Dibuat dengan
+          Next.js & S3.
+        </footer>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
