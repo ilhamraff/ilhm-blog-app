@@ -1,7 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 type S3File = {
@@ -53,7 +53,7 @@ export default function Home() {
                 >
                   {file.key.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                     <div>
-                      <Image
+                      <img
                         src={file.url}
                         alt={file.key}
                         width={500}
